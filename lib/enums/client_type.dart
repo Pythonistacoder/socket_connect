@@ -1,0 +1,1 @@
+enum ClientType { serviceman, client }
