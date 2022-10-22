@@ -90,10 +90,6 @@ sequenceDiagram
 
 ### The class diagram of the socket connectivity
 
-SocketIsolate uses service.configure during initialiseService to configure the service which takes onstart method. the onStart method takes all the steps (like opening socket connection) which will start on starting the service using service.startService
-
-In socket before sending 
-
 ```mermaid
 classDiagram
     direction RL
