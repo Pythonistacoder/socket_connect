@@ -116,7 +116,7 @@ class SocketBloc extends Bloc<SocketEvent, SocketState> {
         internetBloc.stream.listen((internetState) {
       if (internetState is InternetRetrievedState) {
         add(SocketConnectEvent());
-      } else if (internetState is InternetLostState) {
+      } else {
         add(SocketDisconnectEvent());
       }
     });
