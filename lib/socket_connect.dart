@@ -43,7 +43,6 @@ class SocketBloc extends Bloc<SocketEvent, SocketState> {
         }
         _socketRecieveDataSubscription = socket?.getOrderStatusStream().listen(
           (socketDataRecieveEvent) {
-            print("hello");
             socketDataRecieveEvent.orderStatus.receiverId = userId;
             add(socketDataRecieveEvent);
           },
