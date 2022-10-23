@@ -38,9 +38,6 @@ class SocketBloc extends Bloc<SocketEvent, SocketState> {
         socket = Socket(servicemanId: userId);
         socket?.openConnection();
         isConnected = true;
-        if (_socketRecieveDataSubscription != null) {
-          _socketRecieveDataSubscription?.cancel();
-        }
         _socketRecieveDataSubscription = socket?.getOrderStatusStream().listen(
           (socketDataRecieveEvent) {
             socketDataRecieveEvent.orderStatus.receiverId = userId;
@@ -60,6 +57,7 @@ class SocketBloc extends Bloc<SocketEvent, SocketState> {
         if (socket != null) {
           socket!.closeConnection();
           socket = null;
+          _socketRecieveDataSubscription?.cancel();
           isConnected = false;
           emit(
             SocketDisconnectedState(
