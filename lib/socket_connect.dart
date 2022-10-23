@@ -54,21 +54,30 @@ class SocketBloc extends Bloc<SocketEvent, SocketState> {
 
     on<SocketDisconnectEvent>(
       (event, emit) {
-        if (socket != null) {
-          socket!.closeConnection();
-          socket = null;
-          _socketRecieveDataSubscription?.cancel();
-          isConnected = false;
-          emit(
-            SocketDisconnectedState(
-              message: "Socket Disconnected",
-            ),
-          );
-        } else {
-          emit(
-            SocketNullState(),
-          );
-        }
+        socket?.closeConnection();
+        socket = null;
+        _socketRecieveDataSubscription?.cancel();
+        isConnected = false;
+        emit(
+          SocketDisconnectedState(
+            message: "Socket Disconnected",
+          ),
+        );
+        // if (socket != null) {
+        //   socket!.closeConnection();
+        //   socket = null;
+        //   _socketRecieveDataSubscription?.cancel();
+        //   isConnected = false;
+        //   emit(
+        //     SocketDisconnectedState(
+        //       message: "Socket Disconnected",
+        //     ),
+        //   );
+        // } else {
+        //   emit(
+        //     SocketNullState(),
+        //   );
+        // }
       },
     );
 
