@@ -118,6 +118,13 @@ class SocketBloc extends Bloc<SocketEvent, SocketState> {
         add(SocketConnectEvent());
       } else {
         add(SocketDisconnectEvent());
+
+        /// there is a bug in which every second connection prevents any
+        /// receive data event
+        /// for that only the next two lines are created
+        /// TODO: find the error and rectify it
+        add(SocketConnectEvent());
+        add(SocketDisconnectEvent());
       }
     });
   }
