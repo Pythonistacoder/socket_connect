@@ -30,6 +30,7 @@ class Socket {
       final Stream<dynamic> socketStream = channel!.stream;
       await for (final event in socketStream) {
         Map<String, dynamic> orderData = json.decode(event);
+        print(orderData.toString());
         OrderStatus? orderStatus =
             availableOrderStatus[orderData["status"]["statusCode"].toString()];
         if (orderStatus == null) {
