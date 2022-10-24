@@ -2,14 +2,12 @@ library socket_connect;
 
 import 'dart:async';
 
-import 'package:fixpals_internet_connectivity/blocs/internet_bloc/internet_states.dart';
-import 'package:fixpals_internet_connectivity/fixpals_internet_connectivity.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'controller/socket.dart';
-import 'enums/client_type.dart';
-import 'models/available_order_status.dart';
-import 'models/order_status.dart';
+import '../controller/socket.dart';
+import '../enums/client_type.dart';
+import '../models/available_order_status.dart';
+import '../models/order_status.dart';
 import 'socket_bloc/socket_event.dart';
 import 'socket_bloc/socket_states.dart';
 
@@ -18,32 +16,21 @@ class SocketBloc extends Bloc<SocketEvent, SocketState> {
   final String userId;
   final ClientType clientType;
 
-  bool isConnected = false;
-  InternetConnectivityBloc internetBloc;
-
   StreamSubscription? _socketRecieveDataSubscription;
-  StreamSubscription? _internetConnectivitySubscription;
 
   SocketBloc({
     required this.userId,
-    required this.internetBloc,
     required this.clientType,
   }) : super(
-          SocketDisconnectedState(
-            message: "Socket disconnected",
+          SocketConnectedState(
+            message: "Socket connected",
           ),
         ) {
+    socket = Socket(servicemanId: userId);
+    updateChannel();
     on<SocketConnectEvent>(
       (event, emit) {
-        socket = Socket(servicemanId: userId);
-        socket?.openConnection();
-        isConnected = true;
-        _socketRecieveDataSubscription = socket?.getOrderStatusStream().listen(
-          (socketDataRecieveEvent) {
-            socketDataRecieveEvent.orderStatus.receiverId = userId;
-            add(socketDataRecieveEvent);
-          },
-        );
+        updateChannel();
         emit(
           SocketConnectedState(
             message: "Socket connected",
@@ -53,37 +40,21 @@ class SocketBloc extends Bloc<SocketEvent, SocketState> {
     );
 
     on<SocketDisconnectEvent>(
-      (event, emit) {
-        socket?.closeConnection();
-        socket = null;
-        _socketRecieveDataSubscription?.cancel();
-        isConnected = false;
+      (event, emit) async {
+        destroyChannel();
         emit(
           SocketDisconnectedState(
             message: "Socket Disconnected",
           ),
         );
-        // if (socket != null) {
-        //   socket!.closeConnection();
-        //   socket = null;
-        //   _socketRecieveDataSubscription?.cancel();
-        //   isConnected = false;
-        //   emit(
-        //     SocketDisconnectedState(
-        //       message: "Socket Disconnected",
-        //     ),
-        //   );
-        // } else {
-        //   emit(
-        //     SocketNullState(),
-        //   );
-        // }
       },
     );
 
     on<SocketSendDataEvent>(
       (event, emit) {
         if (socket != null) {
+          // destroyChannel();
+          // updateChannel();
           event.orderStatus.senderId = userId;
           socket?.sendOrderStatus(event.orderStatus);
           emit(
@@ -111,22 +82,25 @@ class SocketBloc extends Bloc<SocketEvent, SocketState> {
         }
       },
     );
+  }
 
-    _internetConnectivitySubscription =
-        internetBloc.stream.listen((internetState) {
-      if (internetState is InternetRetrievedState) {
-        add(SocketConnectEvent());
-      } else {
-        add(SocketDisconnectEvent());
+  void updateChannel() async {
+    socket?.openConnection();
+    _socketRecieveDataSubscription = socket?.getOrderStatusStream().listen(
+      (socketDataRecieveEvent) {
+        socketDataRecieveEvent.orderStatus.receiverId = userId;
+        add(socketDataRecieveEvent);
+      },
+    );
+  }
 
-        /// there is a bug in which every second connection prevents any
-        /// receive data event
-        /// for that only the next two lines are created
-        /// TODO: find the error and rectify it
-        add(SocketConnectEvent());
-        add(SocketDisconnectEvent());
-      }
-    });
+  // void setSocket() {
+  //   add(SocketSendDataEvent(orderStatus: orderStatus!));
+  // }
+
+  void destroyChannel() async {
+    socket?.closeConnection();
+    await _socketRecieveDataSubscription?.cancel();
   }
 
   void receiveOrderStatus(OrderStatus recievedOrderStatus) {
@@ -162,7 +136,6 @@ class SocketBloc extends Bloc<SocketEvent, SocketState> {
   @override
   Future<void> close() {
     _socketRecieveDataSubscription?.cancel();
-    _internetConnectivitySubscription?.cancel();
     return super.close();
   }
 }

@@ -1,8 +1,6 @@
 // ignore_for_file: constant_identifier_names
 
 import 'dart:convert';
-
-import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../models/available_order_status.dart';
@@ -19,8 +17,8 @@ class Socket {
   WebSocketChannel? channel;
 
   void openConnection() async {
-    closeConnection();
-    channel = IOWebSocketChannel.connect("$WEBSOCKETURI=$servicemanId");
+    channel =
+        WebSocketChannel.connect(Uri.parse("$WEBSOCKETURI=$servicemanId"));
   }
 
   /// recieves the data from stream channel and transforms it into
