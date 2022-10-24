@@ -53,8 +53,6 @@ class SocketBloc extends Bloc<SocketEvent, SocketState> {
     on<SocketSendDataEvent>(
       (event, emit) {
         if (socket != null) {
-          // destroyChannel();
-          // updateChannel();
           event.orderStatus.senderId = userId;
           socket?.sendOrderStatus(event.orderStatus);
           emit(
@@ -93,10 +91,6 @@ class SocketBloc extends Bloc<SocketEvent, SocketState> {
       },
     );
   }
-
-  // void setSocket() {
-  //   add(SocketSendDataEvent(orderStatus: orderStatus!));
-  // }
 
   void destroyChannel() async {
     socket?.closeConnection();
